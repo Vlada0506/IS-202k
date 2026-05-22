@@ -24,8 +24,20 @@ tasks = load_tasks()
 
 @app.route('/')
 def index():
-    """Главная страница со списком задач"""
+    """Главная страница со всеми задачами"""
     return render_template('index.html', tasks=tasks)
+
+@app.route('/active')
+def active_tasks():
+    """Показывает только активные (невыполненные) задачи"""
+    active = [task for task in tasks if not task.get('done', False)]
+    return render_template('index.html', tasks=active, filter='active')
+
+@app.route('/completed')
+def completed_tasks():
+    """Показывает только выполненные задачи"""
+    completed = [task for task in tasks if task.get('done', False)]
+    return render_template('index.html', tasks=completed, filter='completed')
 
 @app.route('/add', methods=['POST'])
 def add_task():
@@ -64,7 +76,21 @@ def toggle_task(task_id):
         save_tasks(tasks)
     return redirect('/')
 
-# ========== НОВЫЙ МАРШРУТ ДЛЯ РЕДАКТИРОВАНИЯ ==========
+@app.route('/toggle_all_done')
+def toggle_all_done():
+    """Отмечает все задачи как выполненные"""
+    for task in tasks:
+        task['done'] = True
+    save_tasks(tasks)
+    return redirect('/')
+
+@app.route('/toggle_all_undone')
+def toggle_all_undone():
+    """Снимает отметку выполнения со всех задач"""
+    for task in tasks:
+        task['done'] = False
+    save_tasks(tasks)
+    return redirect('/')
 
 @app.route('/edit/<int:task_id>', methods=['GET', 'POST'])
 def edit_task(task_id):

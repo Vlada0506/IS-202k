@@ -5,12 +5,12 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;  /* Светло-серый фон */
+            background-color: #f0f0f0;
             margin: 40px;
         }
         
         h1 {
-            color: #0066cc;  /* Синий заголовок */
+            color: #0066cc;
             text-align: center;
         }
         
@@ -19,54 +19,96 @@
             color: gray;
         }
         
+        .task-checkbox {
+            cursor: pointer;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Стили для списка задач */
         ul {
             list-style: none;
             padding: 0;
-            max-width: 500px;
-            margin: 0 auto;
         }
         
         li {
             margin: 10px 0;
-            padding: 10px;
+            padding: 12px;
             background-color: white;
             border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
         .task-text {
-            flex: 1;
+            flex: 2;
             margin-left: 10px;
         }
         
         .task-date {
             font-size: 12px;
             color: #666;
-            margin-left: 10px;
+            margin: 0 10px;
         }
         
-        .task-checkbox {
-            cursor: pointer;
+        .task-actions {
+            display: flex;
+            gap: 8px;
         }
         
         a {
-            color: #ff4444;
+            color: #0066cc;
             text-decoration: none;
-            margin-left: 10px;
-            padding: 5px 10px;
+            padding: 5px 8px;
             border-radius: 3px;
+            font-size: 12px;
         }
         
         a:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .delete-btn {
+            color: #ff4444;
+        }
+        
+        .delete-btn:hover {
             background-color: #ffeeee;
         }
         
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
+        .clear-btn {
+            background-color: #ff4444;
+            color: white;
+            margin-left: 10px;
+        }
+        
+        .clear-btn:hover {
+            background-color: #cc0000;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background-color: #0066cc;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+        }
+        
+        .filter-btn:hover {
+            background-color: #0052a3;
         }
         
         .form-container {
@@ -100,19 +142,41 @@
             background-color: #0052a3;
         }
         
-        .clear-btn {
-            background-color: #ff4444;
-            margin-left: 10px;
-        }
-        
-        .clear-btn:hover {
-            background-color: #cc0000;
-        }
-        
         .empty-message {
             text-align: center;
             color: #666;
             padding: 20px;
+        }
+        
+        .counter {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .batch-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        .batch-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .batch-btn.undo {
+            background-color: #ffc107;
+            color: #333;
+        }
+        
+        .batch-btn:hover {
+            opacity: 0.85;
         }
         
         h2 {
@@ -124,18 +188,48 @@
 </head>
 <body>
     <div class="container">
-        <h1>Мои задачи</h1>
+        <h1>📋 Мои задачи</h1>
         
+        <!-- Счётчик невыполненных задач -->
+        <div class="counter">
+            📊 Осталось задач: {{ tasks|selectattr('done', 'equalto', False)|list|length }} из {{ tasks|length }}
+        </div>
+        
+        <!-- Кнопки фильтрации -->
+        <div class="filter-buttons">
+            <a href="/" class="filter-btn">📋 Все задачи</a>
+            <a href="/active" class="filter-btn">🟢 Активные</a>
+            <a href="/completed" class="filter-btn">✅ Выполненные</a>
+        </div>
+        
+        <!-- Кнопки массовых операций -->
+        <div class="batch-buttons">
+            <a href="/toggle_all_done" class="batch-btn">✅ Выполнить все</a>
+            <a href="/toggle_all_undone" class="batch-btn undo">🔄 Отменить все</a>
+        </div>
+        
+        <!-- Список задач -->
         <ul>
             {% if tasks %}
                 {% for task in tasks %}
                 <li>
-                    <span class="task-text {% if task.done %}done{% endif %}">
-                        {{ task.text }}
-                    </span>
-                    <span class="task-date">{{ task.created_at }}</span>
-                    <a href="/edit/{{ loop.index0 }}">✏️ Редактировать</a>
-                    <a href="/delete/{{ loop.index0 }}">🗑 Удалить</a>
+                    <div style="display: flex; align-items: center; flex: 1;">
+                        <a href="/toggle/{{ loop.index0 }}" style="font-size: 20px; padding: 0;">
+                            {% if task.done %}
+                                ✅
+                            {% else %}
+                                ◻️
+                            {% endif %}
+                        </a>
+                        <span class="task-text {% if task.done %}done{% endif %}">
+                            {{ task.text }}
+                        </span>
+                        <span class="task-date">{{ task.created_at }}</span>
+                    </div>
+                    <div class="task-actions">
+                        <a href="/edit/{{ loop.index0 }}">✏️ Ред.</a>
+                        <a href="/delete/{{ loop.index0 }}" class="delete-btn">🗑 Удалить</a>
+                    </div>
                 </li>
                 {% endfor %}
             {% else %}
@@ -143,13 +237,14 @@
             {% endif %}
         </ul>
         
+        <!-- Форма добавления задачи -->
         <div class="form-container">
-            <h2>Добавить задачу</h2>
+            <h2>➕ Добавить задачу</h2>
             <form method="POST" action="/add">
                 <input type="text" name="task" placeholder="Новая задача..." required>
                 <button type="submit">Добавить</button>
                 <button type="button" class="clear-btn" onclick="if(confirm('Удалить все задачи?')) window.location.href='/clear_all'">
-                    Очистить всё
+                    🗑 Очистить всё
                 </button>
             </form>
         </div>
