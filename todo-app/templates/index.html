@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список дел</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;  /* Светло-серый фон */
+            margin: 40px;
+        }
+        
+        h1 {
+            color: #0066cc;  /* Синий заголовок */
+            text-align: center;
+        }
+        
+        .done {
+            text-decoration: line-through;
+            color: gray;
+        }
+        
+        ul {
+            list-style: none;
+            padding: 0;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        li {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .task-text {
+            flex: 1;
+            margin-left: 10px;
+        }
+        
+        .task-date {
+            font-size: 12px;
+            color: #666;
+            margin-left: 10px;
+        }
+        
+        .task-checkbox {
+            cursor: pointer;
+        }
+        
+        a {
+            color: #ff4444;
+            text-decoration: none;
+            margin-left: 10px;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+        
+        a:hover {
+            background-color: #ffeeee;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        input[type="text"] {
+            padding: 10px;
+            width: 60%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background-color: #0052a3;
+        }
+        
+        .clear-btn {
+            background-color: #ff4444;
+            margin-left: 10px;
+        }
+        
+        .clear-btn:hover {
+            background-color: #cc0000;
+        }
+        
+        .empty-message {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        
+        h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Мои задачи</h1>
+        
+        <ul>
+            {% if tasks %}
+                {% for task in tasks %}
+                <li>
+                    <input type="checkbox" 
+                           class="task-checkbox" 
+                           {% if task.done %}checked{% endif %}
+                           onclick="window.location.href='/toggle/{{ loop.index0 }}'">
+                    <span class="task-text {% if task.done %}done{% endif %}">
+                        {{ task.text }}
+                    </span>
+                    <span class="task-date">{{ task.created_at }}</span>
+                    <a href="/delete/{{ loop.index0 }}">🗑 Удалить</a>
+                </li>
+                {% endfor %}
+            {% else %}
+                <li class="empty-message">Нет задач. Добавьте первую!</li>
+            {% endif %}
+        </ul>
+        
+        <div class="form-container">
+            <h2>Добавить задачу</h2>
+            <form method="POST" action="/add">
+                <input type="text" name="task" placeholder="Новая задача..." required>
+                <button type="submit">Добавить</button>
+                <button type="button" class="clear-btn" onclick="if(confirm('Удалить все задачи?')) window.location.href='/clear_all'">
+                    Очистить всё
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
