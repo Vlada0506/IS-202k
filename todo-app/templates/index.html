@@ -130,19 +130,16 @@
             {% if tasks %}
                 {% for task in tasks %}
                 <li>
-                    <input type="checkbox" 
-                           class="task-checkbox" 
-                           {% if task.done %}checked{% endif %}
-                           onclick="window.location.href='/toggle/{{ loop.index0 }}'">
                     <span class="task-text {% if task.done %}done{% endif %}">
                         {{ task.text }}
                     </span>
                     <span class="task-date">{{ task.created_at }}</span>
+                    <a href="/edit/{{ loop.index0 }}">✏️ Редактировать</a>
                     <a href="/delete/{{ loop.index0 }}">🗑 Удалить</a>
                 </li>
                 {% endfor %}
             {% else %}
-                <li class="empty-message">Нет задач. Добавьте первую!</li>
+                <li class="empty-message">✨ Нет задач. Добавьте первую!</li>
             {% endif %}
         </ul>
         

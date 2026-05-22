@@ -64,5 +64,40 @@ def toggle_task(task_id):
         save_tasks(tasks)
     return redirect('/')
 
+# ========== НОВЫЙ МАРШРУТ ДЛЯ РЕДАКТИРОВАНИЯ ==========
+
+@app.route('/edit/<int:task_id>', methods=['GET', 'POST'])
+def edit_task(task_id):
+    """Редактирует задачу по индексу"""
+    
+    # Проверка: существует ли задача с таким индексом
+    if task_id < 0 or task_id >= len(tasks):
+        return "Задача не найдена", 404
+    
+    # Получаем задачу для редактирования
+    task = tasks[task_id]
+    
+    if request.method == 'POST':
+        # Получаем новый текст из формы
+        new_text = request.form.get('task', '').strip()
+        
+        # Проверка на пустое поле
+        if new_text == '':
+            return render_template('edit.html', task=task, message="❌ Текст не может быть пустым!")
+        
+        # Проверка: изменился ли текст
+        old_text = task['text']
+        if new_text == old_text:
+            return render_template('edit.html', task=task, message="⚠️ Ничего не изменено. Текст остался прежним.")
+        
+        # Сохраняем новый текст
+        tasks[task_id]['text'] = new_text
+        save_tasks(tasks)
+        
+        return redirect('/')
+    
+    # GET-запрос: показываем форму редактирования
+    return render_template('edit.html', task=task)
+
 if __name__ == '__main__':
     app.run(debug=True)
