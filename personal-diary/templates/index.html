@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>📝 Мои записи</h2>
+
+{% if filter_type == 'week' %}
+    <p class="filter-info">📅 Показаны записи за последнюю неделю</p>
+{% elif search_query %}
+    <p class="filter-info">🔍 Результаты поиска: "{{ search_query }}"</p>
+{% endif %}
+
+{% if entries %}
+    <div class="entries-list">
+        {% for entry in entries %}
+        <div class="entry-card">
+            <div class="entry-header">
+                <h3>{{ entry.title }}</h3>
+                <span class="entry-date">{{ entry.date }}</span>
+            </div>
+            <div class="entry-preview">
+                <p>{{ entry.content[:150] }}{% if entry.content|length > 150 %}...{% endif %}</p>
+            </div>
+            <div class="entry-actions">
+                <a href="{{ url_for('detail', entry_id=entry.id) }}" class="btn-read">📖 Читать</a>
+                <form action="{{ url_for('delete', entry_id=entry.id) }}" method="POST" class="delete-form">
+                    <button type="submit" class="btn-delete" onclick="return confirm('Вы уверены, что хотите удалить эту запись?')">🗑 Удалить</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-message">
+        <p>📭 Пока нет записей. Создайте первую!</p>
+        <a href="{{ url_for('add') }}" class="btn-add">➕ Создать запись</a>
+    </div>
+{% endif %}
+{% endblock %}
