@@ -39,15 +39,42 @@ def completed_tasks():
     completed = [task for task in tasks if task.get('done', False)]
     return render_template('index.html', tasks=completed, filter='completed')
 
+@app.route('/by_priority')
+def by_priority():
+    """Сортирует все задачи по приоритету (от высокого к низкому)"""
+    priority_order = {'высокий': 3, 'средний': 2, 'низкий': 1}
+    sorted_tasks = sorted(
+        tasks,
+        key=lambda task: priority_order.get(task.get('priority', 'средний'), 2),
+        reverse=True
+    )
+    return render_template('index.html', tasks=sorted_tasks, filter='by_priority')
+
+@app.route('/by_priority_active')
+def by_priority_active():
+    """Показывает только активные задачи, отсортированные по приоритету"""
+    priority_order = {'высокий': 3, 'средний': 2, 'низкий': 1}
+    # Фильтруем только активные (невыполненные) задачи
+    active_tasks_list = [task for task in tasks if not task.get('done', False)]
+    # Сортируем их по приоритету
+    sorted_tasks = sorted(
+        active_tasks_list,
+        key=lambda task: priority_order.get(task.get('priority', 'средний'), 2),
+        reverse=True
+    )
+    return render_template('index.html', tasks=sorted_tasks, filter='by_priority_active')
+
 @app.route('/add', methods=['POST'])
 def add_task():
-    """Добавляет новую задачу с текущей датой"""
+    """Добавляет новую задачу с приоритетом и текущей датой"""
     new_task = request.form.get('task')
+    priority = request.form.get('priority', 'средний')
     if new_task and new_task.strip():
         task_data = {
             'text': new_task.strip(),
             'created_at': datetime.now().strftime('%d.%m.%Y %H:%M'),
-            'done': False
+            'done': False,
+            'priority': priority
         }
         tasks.append(task_data)
         save_tasks(tasks)
@@ -104,8 +131,9 @@ def edit_task(task_id):
     task = tasks[task_id]
     
     if request.method == 'POST':
-        # Получаем новый текст из формы
+        # Получаем новый текст и приоритет из формы
         new_text = request.form.get('task', '').strip()
+        new_priority = request.form.get('priority', 'средний')
         
         # Проверка на пустое поле
         if new_text == '':
@@ -113,11 +141,12 @@ def edit_task(task_id):
         
         # Проверка: изменился ли текст
         old_text = task['text']
-        if new_text == old_text:
-            return render_template('edit.html', task=task, message="⚠️ Ничего не изменено. Текст остался прежним.")
+        if new_text == old_text and task.get('priority', 'средний') == new_priority:
+            return render_template('edit.html', task=task, message="⚠️ Ничего не изменено.")
         
-        # Сохраняем новый текст
+        # Сохраняем новый текст и приоритет
         tasks[task_id]['text'] = new_text
+        tasks[task_id]['priority'] = new_priority
         save_tasks(tasks)
         
         return redirect('/')

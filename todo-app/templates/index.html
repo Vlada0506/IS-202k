@@ -14,21 +14,48 @@
             text-align: center;
         }
         
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* Стили для приоритетов */
+        .priority-high {
+            color: #ff4444;
+            font-weight: bold;
+        }
+        
+        .priority-medium {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+        
+        .priority-low {
+            color: #44aa44;
+            font-weight: bold;
+        }
+        
+        /* Цветные карточки задач (дополнительное задание 3) */
+        li.high {
+            background-color: #ffebee;
+            border-left: 5px solid #ff4444;
+        }
+        
+        li.medium {
+            background-color: #fff8e1;
+            border-left: 5px solid #ffaa00;
+        }
+        
+        li.low {
+            background-color: #e8f5e9;
+            border-left: 5px solid #44aa44;
+        }
+        
         .done {
             text-decoration: line-through;
             color: gray;
         }
         
-        .task-checkbox {
-            cursor: pointer;
-        }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        /* Стили для списка задач */
         ul {
             list-style: none;
             padding: 0;
@@ -55,6 +82,11 @@
             font-size: 12px;
             color: #666;
             margin: 0 10px;
+        }
+        
+        .priority-icon {
+            font-size: 16px;
+            margin: 0 5px;
         }
         
         .task-actions {
@@ -111,6 +143,11 @@
             background-color: #0052a3;
         }
         
+        .filter-btn.active {
+            background-color: #004499;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
         .form-container {
             background-color: white;
             padding: 20px;
@@ -122,10 +159,19 @@
         
         input[type="text"] {
             padding: 10px;
-            width: 60%;
+            width: 50%;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
+        }
+        
+        select {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: white;
         }
         
         button {
@@ -153,6 +199,35 @@
             font-size: 14px;
             color: #666;
             margin-bottom: 15px;
+        }
+        
+        .priority-stats {
+            text-align: center;
+            font-size: 14px;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .priority-stats span {
+            margin: 0 15px;
+        }
+        
+        .priority-stats .high-count {
+            color: #ff4444;
+            font-weight: bold;
+        }
+        
+        .priority-stats .medium-count {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+        
+        .priority-stats .low-count {
+            color: #44aa44;
+            font-weight: bold;
         }
         
         .batch-buttons {
@@ -184,22 +259,40 @@
             font-size: 18px;
             margin-bottom: 15px;
         }
+        
+        .current-filter {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📋 Мои задачи</h1>
         
+        <!-- Статистика по приоритетам (задание 1) -->
+        <div class="priority-stats">
+            📊 Статистика по приоритетам:
+            <span class="high-count">🔴 Высоких: {{ tasks|selectattr('priority', 'equalto', 'высокий')|list|length }}</span> |
+            <span class="medium-count">🟡 Средних: {{ tasks|selectattr('priority', 'equalto', 'средний')|list|length }}</span> |
+            <span class="low-count">🟢 Низких: {{ tasks|selectattr('priority', 'equalto', 'низкий')|list|length }}</span>
+        </div>
+        
         <!-- Счётчик невыполненных задач -->
         <div class="counter">
             📊 Осталось задач: {{ tasks|selectattr('done', 'equalto', False)|list|length }} из {{ tasks|length }}
         </div>
         
-        <!-- Кнопки фильтрации -->
+        <!-- Кнопки фильтрации и сортировки -->
         <div class="filter-buttons">
-            <a href="/" class="filter-btn">📋 Все задачи</a>
-            <a href="/active" class="filter-btn">🟢 Активные</a>
-            <a href="/completed" class="filter-btn">✅ Выполненные</a>
+            <a href="/" class="filter-btn {% if not filter %}active{% endif %}">📋 Все задачи</a>
+            <a href="/active" class="filter-btn {% if filter == 'active' %}active{% endif %}">🟢 Активные</a>
+            <a href="/completed" class="filter-btn {% if filter == 'completed' %}active{% endif %}">✅ Выполненные</a>
+            <a href="/by_priority" class="filter-btn {% if filter == 'by_priority' %}active{% endif %}">📊 По приоритету</a>
+            <a href="/by_priority_active" class="filter-btn {% if filter == 'by_priority_active' %}active{% endif %}">🎯 Активные по приоритету</a>
         </div>
         
         <!-- Кнопки массовых операций -->
@@ -208,12 +301,27 @@
             <a href="/toggle_all_undone" class="batch-btn undo">🔄 Отменить все</a>
         </div>
         
+        {% if filter %}
+        <div class="current-filter">
+            {% if filter == 'active' %}🔍 Показаны только активные задачи
+            {% elif filter == 'completed' %}🔍 Показаны только выполненные задачи
+            {% elif filter == 'by_priority' %}🔍 Задачи отсортированы по приоритету (от высокого к низкому)
+            {% elif filter == 'by_priority_active' %}🔍 Показаны только активные задачи, отсортированные по приоритету
+            {% endif %}
+        </div>
+        {% endif %}
+        
         <!-- Список задач -->
         <ul>
             {% if tasks %}
                 {% for task in tasks %}
-                <li>
-                    <div style="display: flex; align-items: center; flex: 1;">
+                <li class="
+                    {% if task.priority == 'высокий' %}high
+                    {% elif task.priority == 'средний' %}medium
+                    {% elif task.priority == 'низкий' %}low
+                    {% endif %}
+                ">
+                    <div style="display: flex; align-items: center; flex: 1; flex-wrap: wrap; gap: 5px;">
                         <a href="/toggle/{{ loop.index0 }}" style="font-size: 20px; padding: 0;">
                             {% if task.done %}
                                 ✅
@@ -221,6 +329,22 @@
                                 ◻️
                             {% endif %}
                         </a>
+                        
+                        <!-- Отображение приоритета иконкой -->
+                        <span class="priority-icon 
+                            {% if task.priority == 'высокий' %}priority-high
+                            {% elif task.priority == 'средний' %}priority-medium
+                            {% elif task.priority == 'низкий' %}priority-low
+                            {% endif %}">
+                            {% if task.priority == 'высокий' %}
+                                🔴
+                            {% elif task.priority == 'средний' %}
+                                🟡
+                            {% else %}
+                                🟢
+                            {% endif %}
+                        </span>
+                        
                         <span class="task-text {% if task.done %}done{% endif %}">
                             {{ task.text }}
                         </span>
@@ -242,6 +366,11 @@
             <h2>➕ Добавить задачу</h2>
             <form method="POST" action="/add">
                 <input type="text" name="task" placeholder="Новая задача..." required>
+                <select name="priority">
+                    <option value="высокий">🔴 Высокий</option>
+                    <option value="средний" selected>🟡 Средний</option>
+                    <option value="низкий">🟢 Низкий</option>
+                </select>
                 <button type="submit">Добавить</button>
                 <button type="button" class="clear-btn" onclick="if(confirm('Удалить все задачи?')) window.location.href='/clear_all'">
                     🗑 Очистить всё
