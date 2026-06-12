@@ -273,6 +273,19 @@
     <div class="container">
         <h1>📋 Мои задачи</h1>
         
+        <!-- Поиск -->
+        <div style="text-align:center; margin-bottom:20px;">
+            <form action="/search" method="GET">
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Поиск по задачам..."
+                    value="{{ search_query or '' }}"
+                >
+                <button type="submit">🔍 Найти</button>
+            </form>
+        </div>
+
         <!-- Статистика по приоритетам (задание 1) -->
         <div class="priority-stats">
             📊 Статистика по приоритетам:
@@ -294,6 +307,24 @@
             <a href="/by_priority" class="filter-btn {% if filter == 'by_priority' %}active{% endif %}">📊 По приоритету</a>
             <a href="/by_priority_active" class="filter-btn {% if filter == 'by_priority_active' %}active{% endif %}">🎯 Активные по приоритету</a>
         </div>
+
+        <div class="filter-buttons">
+            <a href="/sort/date" class="filter-btn">
+                📅 По дате
+            </a>
+
+            <a href="/sort/status" class="filter-btn">
+                ✅ По статусу
+            </a>
+
+            <a href="/sort/priority" class="filter-btn">
+                🔴 По приоритету
+            </a>
+
+            <a href="/sort/alpha" class="filter-btn">
+                🔤 По алфавиту
+            </a>
+        </div>
         
         <!-- Кнопки массовых операций -->
         <div class="batch-buttons">
@@ -307,6 +338,11 @@
             {% elif filter == 'completed' %}🔍 Показаны только выполненные задачи
             {% elif filter == 'by_priority' %}🔍 Задачи отсортированы по приоритету (от высокого к низкому)
             {% elif filter == 'by_priority_active' %}🔍 Показаны только активные задачи, отсортированные по приоритету
+            {% elif filter == 'sort_date' %}🔍 Задачи отсортированы по дате (новые сверху)
+            {% elif filter == 'sort_status' %}🔍 Сначала активные задачи, затем выполненные
+            {% elif filter == 'sort_priority' %}🔍 Задачи отсортированы по приоритету
+            {% elif filter == 'sort_alpha' %}🔍 Задачи отсортированы по алфавиту
+            {% elif filter == 'search' %}🔍 Результаты поиска
             {% endif %}
         </div>
         {% endif %}

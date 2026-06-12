@@ -27,6 +27,25 @@ def index():
     """Главная страница со всеми задачами"""
     return render_template('index.html', tasks=tasks)
 
+@app.route('/search')
+def search():
+    query = request.args.get('q', '').strip().lower()
+
+    if query:
+        filtered_tasks = [
+            task for task in tasks
+            if query in task.get('text', '').lower()
+        ]
+    else:
+        filtered_tasks = tasks
+
+    return render_template(
+        'index.html',
+        tasks=filtered_tasks,
+        search_query=query,
+        filter='search'
+    )
+
 @app.route('/active')
 def active_tasks():
     """Показывает только активные (невыполненные) задачи"""
@@ -63,6 +82,74 @@ def by_priority_active():
         reverse=True
     )
     return render_template('index.html', tasks=sorted_tasks, filter='by_priority_active')
+
+@app.route('/sort/date')
+def sort_by_date():
+    sorted_tasks = sorted(
+        tasks,
+        key=lambda t: datetime.strptime(
+            t.get('created_at', '01.01.2000 00:00'),
+            '%d.%m.%Y %H:%M'
+        ),
+        reverse=True
+    )
+
+    return render_template(
+        'index.html',
+        tasks=sorted_tasks,
+        filter='sort_date'
+    )
+
+
+@app.route('/sort/status')
+def sort_by_status():
+    sorted_tasks = sorted(
+        tasks,
+        key=lambda t: t.get('done', False)
+    )
+
+    return render_template(
+        'index.html',
+        tasks=sorted_tasks,
+        filter='sort_status'
+    )
+
+
+@app.route('/sort/priority')
+def sort_by_priority_new():
+    priority_order = {
+        'высокий': 1,
+        'средний': 2,
+        'низкий': 3
+    }
+
+    sorted_tasks = sorted(
+        tasks,
+        key=lambda t: priority_order.get(
+            t.get('priority', 'средний'),
+            2
+        )
+    )
+
+    return render_template(
+        'index.html',
+        tasks=sorted_tasks,
+        filter='sort_priority'
+    )
+
+
+@app.route('/sort/alpha')
+def sort_by_alpha():
+    sorted_tasks = sorted(
+        tasks,
+        key=lambda t: t.get('text', '').lower()
+    )
+
+    return render_template(
+        'index.html',
+        tasks=sorted_tasks,
+        filter='sort_alpha'
+    )
 
 @app.route('/add', methods=['POST'])
 def add_task():
