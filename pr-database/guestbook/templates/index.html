@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Гостевая книга</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 30px auto;
+        }
+
+        input,
+        textarea,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+        }
+
+        .message {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .author {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📖 Гостевая книга</h1>
+
+<form action="/add" method="POST">
+
+    <input
+        type="text"
+        name="author"
+        placeholder="Ваше имя"
+        required
+    >
+
+    <textarea
+        name="text"
+        placeholder="Ваше сообщение"
+        required
+    ></textarea>
+
+    <button type="submit">
+        Добавить сообщение
+    </button>
+
+</form>
+
+<hr>
+
+{% for message in messages %}
+
+<div class="message">
+
+    <div class="author">
+        {{ message[1] }}
+    </div>
+
+    <div>
+        {{ message[2] }}
+    </div>
+
+</div>
+
+{% endfor %}
+
+</body>
+</html>
