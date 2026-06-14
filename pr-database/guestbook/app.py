@@ -1,40 +1,19 @@
 from flask import Flask, render_template, request, redirect
-import sqlite3
+
+from database import (
+    init_db,
+    get_all_messages,
+    add_message
+)
 
 app = Flask(__name__)
 
-DATABASE = 'guestbook.db'
-
-
-def init_db():
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            author TEXT NOT NULL,
-            text TEXT NOT NULL
-        )
-    ''')
-
-    conn.commit()
-    conn.close()
+init_db()
 
 
 @app.route('/')
 def index():
-    conn = sqlite3.connect(DATABASE)
-    cursor = conn.cursor()
-
-    cursor.execute(
-        'SELECT * FROM messages ORDER BY id DESC'
-    )
-
-    messages = cursor.fetchall()
-
-    conn.close()
-
+    messages = get_all_messages()
     return render_template(
         'index.html',
         messages=messages
@@ -42,28 +21,15 @@ def index():
 
 
 @app.route('/add', methods=['POST'])
-def add_message():
-    author = request.form.get('author')
-    text = request.form.get('text')
+def add():
+    name = request.form.get('name', '').strip()
+    message = request.form.get('message', '').strip()
 
-    if author and text:
-        conn = sqlite3.connect(DATABASE)
-        cursor = conn.cursor()
-
-        cursor.execute(
-            '''
-            INSERT INTO messages(author, text)
-            VALUES (?, ?)
-            ''',
-            (author, text)
-        )
-
-        conn.commit()
-        conn.close()
+    if name and message:
+        add_message(name, message)
 
     return redirect('/')
 
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True)
