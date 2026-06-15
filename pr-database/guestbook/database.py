@@ -24,6 +24,7 @@ def init_db():
 
     conn.commit()
     conn.close()
+    create_admin()
 
 
 def get_all_messages():
@@ -104,3 +105,48 @@ def get_messages_sorted(order='newest'):
     conn.close()
 
     return messages
+
+def create_admin():
+    conn = get_db_connection()
+
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT
+        )
+    ''')
+
+    user = conn.execute(
+        'SELECT * FROM users WHERE username = ?',
+        ('admin',)
+    ).fetchone()
+
+    if user is None:
+        conn.execute(
+            '''
+            INSERT INTO users(username, password)
+            VALUES (?, ?)
+            ''',
+            ('admin', '123')
+        )
+
+    conn.commit()
+    conn.close()
+
+
+def check_user(username, password):
+    conn = get_db_connection()
+
+    user = conn.execute(
+        '''
+        SELECT *
+        FROM users
+        WHERE username = ? AND password = ?
+        ''',
+        (username, password)
+    ).fetchone()
+
+    conn.close()
+
+    return user is not None

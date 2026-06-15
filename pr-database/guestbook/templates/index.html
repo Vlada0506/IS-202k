@@ -15,6 +15,28 @@
 
     <h1>📖 Гостевая книга</h1>
 
+    {% if session.get('logged_in') %}
+
+    <p>
+        Вы вошли как
+        <strong>{{ session.username }}</strong>
+
+        |
+        <a href="/logout">
+            Выйти
+        </a>
+    </p>
+
+{% else %}
+
+    <p>
+        <a href="/login">
+            Войти
+        </a>
+    </p>
+
+{% endif %}
+
     <p class="counter">
         Всего сообщений: {{ total_count }}
     </p>
@@ -70,12 +92,17 @@
                 ({{ msg.created_at }})
             </small>
 
-            <a
-            href="/delete/{{ msg.id }}"
-            class="delete-btn"
-            onclick="return confirm('Удалить сообщение?')"
-            >
-            </a>
+            {% if session.get('logged_in') %}
+
+<a
+    href="/delete/{{ msg.id }}"
+    class="delete-btn"
+    onclick="return confirm('Удалить сообщение?')"
+>
+    ❌
+</a>
+
+{% endif %}
 
             <p>
                 💬 {{ msg.message }}

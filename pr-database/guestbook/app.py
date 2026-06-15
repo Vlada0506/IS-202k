@@ -1,4 +1,10 @@
-from flask import Flask, render_template, request, redirect
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    session
+)
 from datetime import date
 
 from database import (
@@ -9,9 +15,10 @@ from database import (
     get_message_count,
     get_messages_sorted
 )
+from database import check_user
 
 app = Flask(__name__)
-
+app.secret_key = 'secret123'
 init_db()
 
 
@@ -43,9 +50,14 @@ def add():
 
 @app.route('/delete/<int:message_id>')
 def delete(message_id):
+
+    if not session.get('logged_in'):
+        return redirect('/login')
+
     delete_message(message_id)
 
     return redirect('/')
+
 
 @app.route('/sort/newest')
 def sort_newest():
@@ -71,6 +83,37 @@ def sort_oldest():
         total_count=get_message_count(),
         today=date.today().isoformat()
     )
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+
+    if request.method == 'POST':
+
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        if check_user(username, password):
+
+            session['logged_in'] = True
+            session['username'] = username
+
+            return redirect('/')
+
+        error = 'Неверный логин или пароль'
+
+    return render_template(
+        'login.html',
+        error=error
+    )
+
+@app.route('/logout')
+def logout():
+
+    session.pop('logged_in', None)
+    session.pop('username', None)
+
+    return redirect('/')
 
 
 if __name__ == '__main__':
