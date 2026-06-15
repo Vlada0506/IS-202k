@@ -15,6 +15,20 @@
 
     <h1>📖 Гостевая книга</h1>
 
+    <p class="counter">
+        Всего сообщений: {{ total_count }}
+    </p>
+
+    <div class="sort-links">
+        <a href="/sort/newest">
+            📅 Сначала новые
+        </a>
+
+        <a href="/sort/oldest">
+            📅 Сначала старые
+        </a>
+    </div>
+
     <form action="/add" method="POST">
 
         <input
@@ -43,27 +57,29 @@
         {% for msg in messages %}
 
             <div class="
-                message
-                {% if msg.name|lower == 'анна' %}
-                    anna
-                {% elif msg.name|lower == 'иван' %}
-                    ivan
-                {% else %}
-                    other
-                {% endif %}
+            message
+            {% if msg.created_at == today %}
+            fresh
+            {% endif %}
             ">
+            <strong>
+                {{ msg.name }}
+            </strong>
 
-                <strong>
-                    {{ msg.name }}
-                </strong>
+            <small>
+                ({{ msg.created_at }})
+            </small>
 
-                <span class="date">
-                    ({{ msg.created_at }})
-                </span>
+            <a
+            href="/delete/{{ msg.id }}"
+            class="delete-btn"
+            onclick="return confirm('Удалить сообщение?')"
+            >
+            </a>
 
-                <p>
-                    💬 {{ msg.message }}
-                </p>
+            <p>
+                💬 {{ msg.message }}
+            </p>
 
             </div>
 

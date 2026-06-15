@@ -54,3 +54,53 @@ def add_message(name, message):
 
     conn.commit()
     conn.close()
+
+def delete_message(message_id):
+    conn = get_db_connection()
+
+    conn.execute(
+        'DELETE FROM messages WHERE id = ?',
+        (message_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def get_message_count():
+    conn = get_db_connection()
+
+    cursor = conn.execute(
+        'SELECT COUNT(*) FROM messages'
+    )
+
+    count = cursor.fetchone()[0]
+
+    conn.close()
+
+    return count
+
+
+def get_messages_sorted(order='newest'):
+    conn = get_db_connection()
+
+    if order == 'oldest':
+        messages = conn.execute(
+            '''
+            SELECT *
+            FROM messages
+            ORDER BY created_at ASC, id ASC
+            '''
+        ).fetchall()
+    else:
+        messages = conn.execute(
+            '''
+            SELECT *
+            FROM messages
+            ORDER BY created_at DESC, id DESC
+            '''
+        ).fetchall()
+
+    conn.close()
+
+    return messages

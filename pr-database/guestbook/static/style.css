@@ -61,3 +61,36 @@ button:hover {
     color: gray;
     font-size: 12px;
 }
+
+.delete-btn {
+    float: right;
+    color: red;
+    text-decoration: none;
+    font-size: 1.2em;
+    margin-left: 10px;
+}
+
+.delete-btn:hover {
+    color: darkred;
+}
+
+.counter {
+    background-color: #e9ecef;
+    padding: 8px;
+    border-radius: 5px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sort-links {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.sort-links a {
+    margin: 0 10px;
+}
+
+.fresh {
+    background-color: #fff3cd;
+}
